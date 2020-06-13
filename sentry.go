@@ -185,6 +185,12 @@ func (hook *SentryHook) Fire(entry *logrus.Entry) error {
 	packet.Timestamp = raven.Timestamp(entry.Time)
 	packet.Level = severityMap[entry.Level]
 	packet.Platform = "go"
+	packet.Interfaces = append(packet.Interfaces, &Contexts{
+		Runtime: Runtime{
+			Name:    "go",
+			Version: runtime.Version(),
+		},
+	})
 
 	// set special fields
 	if hook.serverName != "" {
@@ -429,4 +435,17 @@ type Value struct {
 
 func (b *Breadcrumbs) Class() string {
 	return "breadcrumbs"
+}
+
+type Contexts struct {
+	Runtime Runtime `json:"runtime"`
+}
+
+func (c *Contexts) Class() string {
+	return "contexts"
+}
+
+type Runtime struct {
+	Name    string `json:"name"`
+	Version string `json:"version"`
 }
